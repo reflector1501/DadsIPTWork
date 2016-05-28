@@ -1,0 +1,511 @@
+<html>
+	<head>
+		  
+	</head>
+	<body>		
+		<canvas id="myCanvas" width="500" height="600" style="border:1px solid #000000;">
+		</canvas>
+		<script>
+				var c = document.getElementById("myCanvas");
+				var ctx = c.getContext("2d");
+				//Create player 
+				var player = {width:17, height:17, x:51, y:36, color:'red', xVelo:0, yVelo:0, speedLimit:30, aRate:1, gravity:0};
+
+				//Game heartbeat at 60 fps
+				var myVar=setInterval(function () {heartbeat()}, 1000/60);
+				
+				var imageBackground = new Image();
+				imageBackground.src = './Images/Backgrounds/Menu.jpg';
+				var imageBackgroundLoaded = false;
+
+				var imageControls = new Image();
+				imageControls.src = './Images/Backgrounds/Controls.jpg';
+				var imageControlsLoaded = false;
+				
+				
+				
+				var imageMaze = new Image();
+				imageMaze.src = './Images/Mazes/Maze3.jpg';
+				var imageControlsLoaded = false;
+				
+				var imageEnemy = new Image();
+				imageEnemy.src = './Images/Sprites/Enemy.jpg';
+				var imageEnemyLoaded = false;
+				
+				imageControls.onload = function()
+				{
+					imageControlsLoaded = true;
+					//startGame();
+				}
+				
+				imageBackground.onload = function()
+				{
+					imageObjLoaded = true;
+					startGame();
+				}
+				
+				
+				
+			
+				function startGame()
+				{
+					if (imageBackgroundLoaded && imageControlsLoaded)
+					{
+						myVar = setInterval(function(){gameUpdate()}, 1000,60);
+					}
+				}	
+				
+				
+				//start off assuming that we want to go to the menu at the beggining of the game.
+				var state = 'menu';
+				
+				//To correct misalignment of the mouse position
+				var rect = c.getBoundingClientRect();
+				var xOffset = rect.left;
+				var yOffset = rect.top;
+				
+				//Create each button here using the same format
+				var easyButton = {width:140, height:100, xPos:100, yPos:150, text: 'easy', color:'red', textColor:'white', border:'black'};
+				
+				var hardButton = {width:140, height:100, xPos:275, yPos:150, text: 'hard', color:'red', textColor:'white', border:'black'};
+				
+				var ControlsButton = {width:200, height:100, xPos:150, yPos:300, text: 'Controls', color:'red', textColor:'white', border:'black'};
+				
+				var exitButton = {width:100, height:50, xPos:380, yPos:545, text: 'Back', color:'black', textColor:'white', border:'black'};
+				
+				//add variables to hold on to players, platforms, enemies and any other objects you might need
+				
+				//var player;
+				//var enemies;
+				//var lives;
+				//var health;
+				//var inventory;
+				//var platforms
+				
+				
+				
+				
+				
+				
+				//A mouse click listener
+				c.addEventListener("mousedown",mousedown);
+				
+				function mousedown(e)
+				{
+					//Add in a state for other parts of the game. i.e. ingame, pauses and so on
+					if (state == 'menu')
+					{
+						
+					
+						if (intersection(e, easyButton))
+						{
+							state = 'ingame';
+							//Add code here to add listeners for keys and to set or reset variables
+						}
+						if (intersection(e, hardButton))
+						{
+							state = 'ingame';
+							//Add code here to add listeners for keys and to set or reset variables
+						}
+						if (intersection(e, ControlsButton))
+						{
+							state = 'Controls';
+						}
+					}
+					
+					if (state == 'ingame')
+					{
+						if (intersection(e, exitButton))
+						{
+							state = 'menu';
+							//Remove the keydown and up listeners
+							
+							//Delete enemies and any other objects not needed for easy screen
+						}
+					}
+				
+					if (state == 'Controls')
+					{
+						if (intersection(e, exitButton))
+						{
+							state = 'menu';
+						}
+					}
+				
+				}
+				
+				
+				function heartbeat()
+				{	
+					//Clear the canvas
+					ctx.clearRect(0,0,500,600);
+					
+				 	//Place the things you want to draw when the menu is meant to be up here
+					if (state == 'menu')
+					{
+						//Draw the background
+						ctx.drawImage(imageBackground,0,0,500,600)
+						
+						//Draw the easy button
+						ctx.fillStyle = easyButton.color;
+						ctx.fillRect(easyButton.xPos,easyButton.yPos, easyButton.width, easyButton.height);
+						
+						ctx.strokeStyle = easyButton.border;
+						ctx.lineWidth=2;
+						ctx.strokeRect(easyButton.xPos,easyButton.yPos, easyButton.width, easyButton.height);
+				
+						ctx.fillStyle = easyButton.textColor;
+						ctx.font="60px Georgia";
+						ctx.fillText(easyButton.text,easyButton.xPos + 15,easyButton.yPos +65);
+						
+						//Draw the hard button
+						ctx.fillStyle = hardButton.color;
+						ctx.fillRect(hardButton.xPos,hardButton.yPos, hardButton.width, hardButton.height);
+						
+						ctx.strokeStyle = hardButton.border;
+						ctx.lineWidth=2;
+						ctx.strokeRect(hardButton.xPos,hardButton.yPos, hardButton.width, hardButton.height);
+				
+						ctx.fillStyle = hardButton.textColor;
+						ctx.font="60px Georgia";
+						ctx.fillText(hardButton.text,hardButton.xPos + 15,hardButton.yPos +65);
+						
+						//draw the Controls button
+					
+						ctx.fillStyle = ControlsButton.color;
+						ctx.fillRect(ControlsButton.xPos,ControlsButton.yPos, ControlsButton.width, ControlsButton.height);
+						
+						ctx.strokeStyle = ControlsButton.border;
+						ctx.lineWidth=2;
+						ctx.strokeRect(ControlsButton.xPos,ControlsButton.yPos, ControlsButton.width, ControlsButton.height);
+						
+						ctx.fillStyle = ControlsButton.textColor;
+						ctx.font="40px Georgia";
+						ctx.fillText(ControlsButton.text,ControlsButton.xPos + 30,ControlsButton.yPos +60);
+						
+						//Draw the game's name
+						ctx.fillStyle = 'White';
+						ctx.fillText('Maze Runner' , 110, 60);
+						
+					}
+					
+					if (state == 'ingame')
+					{
+						//draw maze
+						ctx.drawImage(imageMaze,0,20,500,500)
+						
+						
+						//draw Enemy
+						ctx.drawImage(imageEnemy,380,367)
+						
+						//Draw the Pause button
+						ctx.fillStyle = exitButton.color;
+						ctx.fillRect(exitButton.xPos,exitButton.yPos, exitButton.width, exitButton.height);
+						
+						ctx.strokeStyle = exitButton.border;
+						ctx.lineWidth=6;
+						ctx.strokeRect(exitButton.xPos,exitButton.yPos, exitButton.width, exitButton.height);
+						
+						ctx.fillStyle = exitButton.textColor;
+						ctx.font="40px Georgia";
+						ctx.fillText(exitButton.text,exitButton.xPos + 8,exitButton.yPos + 37);
+						
+						//draw score
+						ctx.fillStyle = 'Black';
+						ctx.font="20px Georgia";
+						ctx.fillText('Score:235' , 20, 570);
+						
+						//Draw lives
+						ctx.fillStyle = 'Black';
+						ctx.font="20px Georgia";
+						ctx.fillText('Lives:3' , 150, 570);
+						
+						//Draw mode
+						ctx.fillStyle = 'Black';
+						ctx.font="20px Georgia";
+						ctx.fillText('Mode:Easy' , 250, 570);
+						
+						//Draw Start
+						ctx.fillStyle = 'Black';
+						ctx.font="15px Georgia";
+						ctx.fillText('<---Start' , 70, 15);
+						
+						//Draw End
+						ctx.fillStyle = 'Black';
+						ctx.font="15px Georgia";
+						ctx.fillText('<---Start' , 70, 15);
+						
+						//Add code here for moving your character and other physics
+							
+							var upKey, rightKey, downKey, leftKey = false;
+							var start = new Date();
+							var last = new Date();
+							var myVar;
+							
+							var imagePlayer = new Image();
+							imagePlayer.src = './Images/Sprites/Player.jpg';
+							var imagePlayerLoaded = false;
+							
+							
+							
+							window.addEventListener("keydown", doKeyDown, true);
+							window.addEventListener("keyup", doKeyUp, true);
+							
+							var myTime = setInterval(function() {gameUpdate()}, 1000/60);
+							
+							function doKeyDown(e)
+							{
+								//console.log(e.keyCode);
+								if(e.keyCode ==87)
+									{
+									upKey = true;
+									}
+								if(e.keyCode ==68)
+									{
+									rightKey = true;
+									}
+								if(e.keyCode ==83)
+									{
+									downKey = true;
+									}
+								if(e.keyCode ==65)
+									{
+									leftKey = true;
+									}
+							}
+							
+							function doKeyUp(e)
+							{
+								//console.log(e.KeyCode);
+								if(e.keyCode ==87)
+									{
+									upKey = false;
+									}
+								if(e.keyCode ==68)
+									{
+									rightKey = false;
+									}
+								if(e.keyCode ==83)
+									{
+									downKey = false;
+									}
+								if(e.keyCode ==65)
+									{
+									leftKey = false;
+									}
+							
+							}
+
+							function gameUpdate()
+							{
+								var moved = false;
+
+								if (upKey && !moved)
+								{
+									var borderData = ctx.getImageData(player.x, player.y-1, player.x+player.width, player.y-1);
+									if (borderData.data[0] == 255 && borderData.data[1] == 255 && borderData.data[2] == 255)
+									{
+										player.y-=(player.aRate/player.speedLimit);
+									}
+									moved = true;
+								}
+
+								if (downKey && !moved)
+								{
+									var borderData = ctx.getImageData(player.x, player.y+player.height+1, player.x+player.width, player.y+1);
+									if (borderData.data[0] == 255 && borderData.data[1] == 255 && borderData.data[2] == 255)
+									{
+										player.y+=(player.aRate/player.speedLimit);
+									}
+									moved = true;
+								}
+
+								if (leftKey && !moved)
+								{
+									var borderData = ctx.getImageData(player.x-1, player.y, player.x-1, player.y+player.width);
+									if (borderData.data[0] == 255 && borderData.data[1] == 255 && borderData.data[2] == 255)
+									{
+										player.x-=(player.aRate/player.speedLimit);
+									}
+									moved = true;
+								}
+
+								if (rightKey && !moved)
+								{
+									var borderData = ctx.getImageData(player.x+player.width+1, player.y, player.x+player.width+1, player.y+player.height+1);
+									if (borderData.data[0] == 255 && borderData.data[1] == 255 && borderData.data[2] == 255)
+									{
+										player.x+=(player.aRate/player.speedLimit);
+									}
+									moved = true;
+								}
+
+								//player.x += player.xVelo;
+								//player.y += player.yVelo;
+
+								ctx.fillStyle = player.color;
+								ctx.fillRect(player.x, player.y, player.width, player.height);
+
+								//player.xVelo = player.xVelo * .75;
+								//player.yVelo = player.yVelo * .75;
+
+							}
+
+						/*
+							function gameUpdate()
+							{
+
+								var moved = false;
+								if (upKey && !leftKey && !rightKey && !moved)
+								{
+									player.yVelo-=player.aRate;
+									moved = true;
+								}
+
+								if (downKey && !leftKey && !rightKey && !moved)
+								{
+									player.yVelo+=player.aRate;
+									move = true;
+								}
+
+								if (leftKey && !downKey && !upKey && !moved)
+								{
+									player.xVelo-=player.aRate;
+									move = true;
+								}
+								if (rightKey && !downKey && !upKey && !moved)
+								{
+									player.xVelo+=player.aRate;
+									move = true;
+								}
+								if (player.xVelo < -1 * player.speedLimit)
+								{
+									player.xVelo = -1 * player.speedLimit;
+								}
+
+								if (player.xVelo > player.speedLmit)
+								{
+									player.xVelo = player.speedLimit;
+								}
+
+								if (player.yVelo < -1 * player.speedLimit)
+								{
+									player.yVelo = -1 * player.speedLimit;
+								}
+
+								if (player.yVelo > player.speedLmit)
+								{
+									player.yVelo = player.speedLimit;
+								}
+
+								player.x += player.xVelo;
+								player.y += player.yVelo;
+
+								ctx.fillStyle = player.color;
+								ctx.fillRect(player.x, player.y, player.width, player.height);
+
+								if (player.x + player.xVelo + player.width > 599)
+								{
+									alert('out');
+									player.x -= 10;
+									player.xVelo = player.xVelo * -1;
+									keyRight = false;
+								}
+								if (player.y + player.yVelo + player.width > 599)
+								{
+									alert('out');
+									player.y -= 10;
+									player.yVelo = player.yVelo * -1;
+									keyDown = false;
+								}
+								if (player.x + player.xVelo + player.width < 1)
+								{
+									alert('out');
+									player.x += 10;
+									player.xVelo = player.xVelo * -1;
+									keyLeft = false;
+								}
+								if (player.y + player.yVelo + player.width < 1)
+								{
+									alert('out');
+									player.y += 10;
+									player.yVelo = player.yVelo * -1;
+									keyLeft = false;
+								}
+								if (player.yVelo < player.gravity)
+								{
+									player.yVelo += 1;
+								}
+
+								//player.xVelo = player.xVelo * .75;
+								//player.yVelo = player.yVelo * .75;
+							}
+							*/
+						}
+
+
+
+
+
+
+						if (state == 'Controls')
+						{
+							//Draw the Background
+							ctx.drawImage(imageControls,0,0,500,600)
+
+							//Draw the exit button
+							ctx.fillStyle = exitButton.color;
+							ctx.fillRect(exitButton.xPos,exitButton.yPos, exitButton.width, exitButton.height);
+
+							ctx.strokeStyle = exitButton.border;
+							ctx.lineWidth=6;
+							ctx.strokeRect(exitButton.xPos,exitButton.yPos, exitButton.width, exitButton.height);
+
+							ctx.fillStyle = exitButton.textColor;
+							ctx.font="40px Georgia";
+							ctx.fillText(exitButton.text,exitButton.xPos + 8,exitButton.yPos + 37);
+
+							//Draw the heading
+							ctx.font="40px Georgia";
+							ctx.fillStyle = 'White';
+							ctx.fillText('Controls' , 160 , 50);
+
+							ctx.font="20px Comicsands"
+							ctx.fillText("Right Key - Moves line of sight clockwise", 50, 100)
+
+							ctx.font="20px Comicsands"
+							ctx.fillText("Left Key - Moves line of sight anti-clockwise", 50, 125)
+
+							ctx.font="20px Comicsands"
+							ctx.fillText("Spacebar - Selects character in the middle of your line", 50, 150)
+
+							ctx.font="20px Comicsands"
+							ctx.fillText("of sight", 140, 175)
+
+						}
+
+					}
+				
+				
+				//Used to check if the mouse is clicked inside the given object
+				function intersection(_e, _object)
+				{
+					if (_e.clientX - xOffset > _object.xPos && _e.clientX - xOffset < _object.xPos + _object.width &&
+		_e.clientY - yOffset< _object.yPos + _object.height && _e.clientY - yOffset > _object.yPos)
+					{
+						return true;
+					}
+					else
+					{
+						return false;
+					}
+				}
+				
+				
+				
+				
+				
+			
+		</script> 
+	</body>
+</html>
